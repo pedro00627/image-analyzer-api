@@ -1,0 +1,17 @@
+name: Main PR Restriction
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar rama de origen
+        if: github.head_ref != 'develop'
+        run: |
+          echo "Error: Pull requests to 'main' are restricted to 'develop'."
+          echo "Origin branch is: ${{ github.head_ref }}"
+          exit 1
