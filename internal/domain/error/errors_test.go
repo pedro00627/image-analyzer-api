@@ -2,7 +2,9 @@ package error
 
 import "testing"
 
-func TestDomainError_Error(t *testing.T) {
+const testInvalidInputMessage = "Invalid input provided"
+
+func TestDomainErrorError(t *testing.T) {
 	err := &DomainError{
 		Code:    "TEST_ERROR",
 		Message: "This is a test error",
@@ -15,13 +17,13 @@ func TestDomainError_Error(t *testing.T) {
 }
 
 func TestNewDomainError(t *testing.T) {
-	err := NewDomainError("INVALID_INPUT", "Invalid input provided")
+	err := NewDomainError("INVALID_INPUT", testInvalidInputMessage)
 
 	if err.Code != "INVALID_INPUT" {
 		t.Errorf("Code = %q, expected %q", err.Code, "INVALID_INPUT")
 	}
-	if err.Message != "Invalid input provided" {
-		t.Errorf("Message = %q, expected %q", err.Message, "Invalid input provided")
+	if err.Message != testInvalidInputMessage {
+		t.Errorf("Message = %q, expected %q", err.Message, testInvalidInputMessage)
 	}
 }
 
