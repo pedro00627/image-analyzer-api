@@ -74,6 +74,10 @@ func TestLoadConfig_MissingAIProvider(t *testing.T) {
 func TestLoadConfig_MissingAPIKey(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	// Missing API_KEY - no error, credential validation is done by adapters
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	cfg, err := LoadConfig()
@@ -89,6 +93,10 @@ func TestLoadConfig_MissingAPIKey(t *testing.T) {
 func TestLoadConfig_InvalidAIProvider(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "invalid_provider")
 	os.Setenv("API_KEY", "test_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	// No validation on provider value, just requires it to be set
@@ -106,6 +114,10 @@ func TestLoadConfig_InvalidPort(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	os.Setenv("API_KEY", "test_key")
 	os.Setenv("PORT", "invalid")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	_, err := LoadConfig()
@@ -116,8 +128,11 @@ func TestLoadConfig_InvalidPort(t *testing.T) {
 
 func TestLoadConfig_InvalidTimeout(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
-	os.Setenv("GOOGLE_VISION_API_KEY", "test_key")
+	os.Setenv("API_KEY", "test_key")
 	os.Setenv("AI_SERVICE_TIMEOUT", "invalid")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	_, err := LoadConfig()
@@ -129,7 +144,10 @@ func TestLoadConfig_InvalidTimeout(t *testing.T) {
 func TestLoadConfig_InvalidReadTimeout(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	os.Setenv("API_KEY", "test_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
 	os.Setenv("HTTP_READ_TIMEOUT", "invalid")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	_, err := LoadConfig()
@@ -141,7 +159,10 @@ func TestLoadConfig_InvalidReadTimeout(t *testing.T) {
 func TestLoadConfig_InvalidWriteTimeout(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	os.Setenv("API_KEY", "test_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
 	os.Setenv("HTTP_WRITE_TIMEOUT", "invalid")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	_, err := LoadConfig()
@@ -153,6 +174,9 @@ func TestLoadConfig_InvalidWriteTimeout(t *testing.T) {
 func TestLoadConfig_InvalidIdleTimeout(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	os.Setenv("API_KEY", "test_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
 	os.Setenv("HTTP_IDLE_TIMEOUT", "invalid")
 	defer cleanEnv()
 
@@ -164,7 +188,11 @@ func TestLoadConfig_InvalidIdleTimeout(t *testing.T) {
 
 func TestLoadConfig_Defaults(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
-	os.Setenv("GOOGLE_VISION_API_KEY", "test_key")
+	os.Setenv("API_KEY", "test_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	// Only required vars, others should use defaults
 	defer cleanEnv()
 
@@ -186,6 +214,10 @@ func TestLoadConfig_InvalidMaxFileSize(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "google_vision")
 	os.Setenv("API_KEY", "test_key")
 	os.Setenv("MAX_FILE_SIZE", "not-a-number")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	_, err := LoadConfig()
@@ -212,6 +244,10 @@ func TestLoadConfig_ImaggaProvider(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "imagga")
 	os.Setenv("API_KEY", "imagga_key")
 	os.Setenv("API_SECRET", "imagga_secret")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	cfg, err := LoadConfig()
@@ -234,6 +270,10 @@ func TestLoadConfig_ImaggaProvider(t *testing.T) {
 func TestLoadConfig_OpenAIProvider(t *testing.T) {
 	os.Setenv("AI_PROVIDER", "openai")
 	os.Setenv("API_KEY", "openai_key")
+	os.Setenv("AI_SERVICE_TIMEOUT", "30s")
+	os.Setenv("HTTP_READ_TIMEOUT", "10s")
+	os.Setenv("HTTP_WRITE_TIMEOUT", "10s")
+	os.Setenv("HTTP_IDLE_TIMEOUT", "60s")
 	defer cleanEnv()
 
 	cfg, err := LoadConfig()

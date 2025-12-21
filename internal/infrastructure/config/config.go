@@ -80,12 +80,12 @@ func (c *ConfigImpl) GetSecret() string {
 	return c.APISecret
 }
 
-// GetAllowedMimes implements Config and validator.ValidatorConfig
+// GetAllowedMimes implements Config
 func (c *ConfigImpl) GetAllowedMimes() []string {
 	return c.AllowedFileTypes
 }
 
-// GetMaxSize implements Config and validator.ValidatorConfig
+// GetMaxSize implements Config
 func (c *ConfigImpl) GetMaxSize() int64 {
 	return c.MaxFileSize
 }
@@ -129,26 +129,26 @@ func loadFileUploadConfig(cfg *ConfigImpl, reader Reader) error {
 	return nil
 }
 
-// loadTimeoutConfig loads all timeout configurations
+// loadTimeoutConfig loads all timeout configurations from environment variables
 func loadTimeoutConfig(cfg *ConfigImpl, reader Reader) error {
 	var err error
 
-	cfg.AIServiceTimeout, err = parseDuration(reader, "AI_SERVICE_TIMEOUT", "30s")
+	cfg.AIServiceTimeout, err = parseDuration(reader, "AI_SERVICE_TIMEOUT", "")
 	if err != nil {
 		return err
 	}
 
-	cfg.HTTPReadTimeout, err = parseDuration(reader, "HTTP_READ_TIMEOUT", "10s")
+	cfg.HTTPReadTimeout, err = parseDuration(reader, "HTTP_READ_TIMEOUT", "")
 	if err != nil {
 		return err
 	}
 
-	cfg.HTTPWriteTimeout, err = parseDuration(reader, "HTTP_WRITE_TIMEOUT", "10s")
+	cfg.HTTPWriteTimeout, err = parseDuration(reader, "HTTP_WRITE_TIMEOUT", "")
 	if err != nil {
 		return err
 	}
 
-	cfg.HTTPIdleTimeout, err = parseDuration(reader, "HTTP_IDLE_TIMEOUT", "60s")
+	cfg.HTTPIdleTimeout, err = parseDuration(reader, "HTTP_IDLE_TIMEOUT", "")
 	if err != nil {
 		return err
 	}
@@ -156,9 +156,12 @@ func loadTimeoutConfig(cfg *ConfigImpl, reader Reader) error {
 	return nil
 }
 
-// parseDuration parses a duration from Reader or default value
+// parseDuration parses a duration from Reader or validates it was provided
 func parseDuration(reader Reader, key, defaultValue string) (time.Duration, error) {
 	value := reader.Get(key, defaultValue)
+	if value == "" {
+		return 0, fmt.Errorf("%s is required", key)
+	}
 	duration, err := time.ParseDuration(value)
 	if err != nil {
 		return 0, fmt.Errorf("invalid %s: %w", key, err)

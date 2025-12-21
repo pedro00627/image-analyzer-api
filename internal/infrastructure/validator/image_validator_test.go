@@ -8,10 +8,18 @@ import (
 	"testing"
 )
 
-// mockValidatorConfig implements ValidatorConfig for testing
+// mockValidatorConfig implements config.Config for testing
 type mockValidatorConfig struct {
 	allowedMimes []string
 	maxSize      int64
+}
+
+func (m *mockValidatorConfig) GetProvider() string {
+	return "test"
+}
+
+func (m *mockValidatorConfig) GetSecret() string {
+	return "test-secret"
 }
 
 func (m *mockValidatorConfig) GetAllowedMimes() []string {
