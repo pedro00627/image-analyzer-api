@@ -4,6 +4,8 @@ package config
 import "os"
 
 // Reader defines the interface for reading configuration values
+//go:generate mockgen -source=./reader.go -destination=./mocks/mock_reader.go -package=mocks
+
 type Reader interface {
 	Get(key, defaultValue string) string
 }
