@@ -1,4 +1,3 @@
-// Package config handles application configuration from environment variables
 package config
 
 import (
@@ -8,14 +7,49 @@ import (
 	"time"
 )
 
+//go:generate mockgen -source=./config.go -destination=./mocks/mock_config.go -package=mocks
+
+// Config defines the application configuration interface
+type Config interface {
+	// AI Provider
+	GetProvider() string
+	GetSecret() string
+
+	// Validator
+	GetAllowedMimes() []string
+	GetMaxSize() int64
+}
+
+// ConfigImpl is the concrete implementation of Config
+type ConfigImpl struct {
+	// AI Provider Configuration
+	AIProvider string
+	APIKey     string
+	APISecret  string
+
+	// Server Configuration
+	Port           int
+	AllowedOrigins []string
+
+	// File Upload Limits
+	MaxFileSize      int64
+	AllowedFileTypes []string
+
+	// Timeouts
+	AIServiceTimeout time.Duration
+	HTTPReadTimeout  time.Duration
+	HTTPWriteTimeout time.Duration
+	HTTPIdleTimeout  time.Duration
+}
+
 // LoadConfig loads configuration from environment variables
-func LoadConfig() (*Config, error) {
+func LoadConfig() (Config, error) {
 	return LoadConfigWithReader(envReader{})
 }
 
 // LoadConfigWithReader loads configuration using a custom Reader (for testing)
-func LoadConfigWithReader(reader Reader) (*Config, error) {
-	cfg := &Config{}
+func LoadConfigWithReader(reader Reader) (Config, error) {
+	cfg := &ConfigImpl{}
 
 	if err := loadAIProviderConfig(cfg, reader); err != nil {
 		return nil, err
@@ -36,29 +70,28 @@ func LoadConfigWithReader(reader Reader) (*Config, error) {
 	return cfg, nil
 }
 
-type Config struct {
-	// AI Provider Configuration
-	AIProvider string
-	APIKey     string // Contains the API key(s) for the selected provider
-	APISecret  string // Optional, used by some providers like Imagga
+// GetProvider implements Config
+func (c *ConfigImpl) GetProvider() string {
+	return c.AIProvider
+}
 
-	// Server Configuration
-	Port           int
-	AllowedOrigins []string
+// GetSecret implements Config
+func (c *ConfigImpl) GetSecret() string {
+	return c.APISecret
+}
 
-	// File Upload Limits
-	MaxFileSize      int64
-	AllowedFileTypes []string
+// GetAllowedMimes implements Config and validator.ValidatorConfig
+func (c *ConfigImpl) GetAllowedMimes() []string {
+	return c.AllowedFileTypes
+}
 
-	// Timeouts
-	AIServiceTimeout time.Duration
-	HTTPReadTimeout  time.Duration
-	HTTPWriteTimeout time.Duration
-	HTTPIdleTimeout  time.Duration
+// GetMaxSize implements Config and validator.ValidatorConfig
+func (c *ConfigImpl) GetMaxSize() int64 {
+	return c.MaxFileSize
 }
 
 // loadAIProviderConfig loads AI provider configuration
-func loadAIProviderConfig(cfg *Config, reader Reader) error {
+func loadAIProviderConfig(cfg *ConfigImpl, reader Reader) error {
 	cfg.AIProvider = reader.Get("AI_PROVIDER", "")
 	if cfg.AIProvider == "" {
 		return fmt.Errorf("AI_PROVIDER is required")
@@ -71,7 +104,7 @@ func loadAIProviderConfig(cfg *Config, reader Reader) error {
 }
 
 // loadServerConfig loads server-related configuration
-func loadServerConfig(cfg *Config, reader Reader) error {
+func loadServerConfig(cfg *ConfigImpl, reader Reader) error {
 	port, err := strconv.Atoi(reader.Get("PORT", "8080"))
 	if err != nil {
 		return fmt.Errorf("invalid PORT: %w", err)
@@ -84,7 +117,7 @@ func loadServerConfig(cfg *Config, reader Reader) error {
 }
 
 // loadFileUploadConfig loads file upload limits and allowed types
-func loadFileUploadConfig(cfg *Config, reader Reader) error {
+func loadFileUploadConfig(cfg *ConfigImpl, reader Reader) error {
 	maxSize, err := strconv.ParseInt(reader.Get("MAX_FILE_SIZE", "10485760"), 10, 64)
 	if err != nil {
 		return fmt.Errorf("invalid MAX_FILE_SIZE: %w", err)
@@ -97,7 +130,7 @@ func loadFileUploadConfig(cfg *Config, reader Reader) error {
 }
 
 // loadTimeoutConfig loads all timeout configurations
-func loadTimeoutConfig(cfg *Config, reader Reader) error {
+func loadTimeoutConfig(cfg *ConfigImpl, reader Reader) error {
 	var err error
 
 	cfg.AIServiceTimeout, err = parseDuration(reader, "AI_SERVICE_TIMEOUT", "30s")
@@ -121,22 +154,6 @@ func loadTimeoutConfig(cfg *Config, reader Reader) error {
 	}
 
 	return nil
-}
-
-// ValidationConfig returns a validator.ValidationConfig based on app config
-// This is used when constructing the ImageValidator
-func (c *Config) ValidationConfig() ValidationConfig {
-	return ValidationConfig{
-		AllowedMimes: c.AllowedFileTypes,
-		MaxSize:      c.MaxFileSize,
-	}
-}
-
-// ValidationConfig is a DTO for validator configuration
-// It's defined here to avoid circular imports
-type ValidationConfig struct {
-	AllowedMimes []string
-	MaxSize      int64
 }
 
 // parseDuration parses a duration from Reader or default value
