@@ -8,6 +8,20 @@ import (
 	"testing"
 )
 
+// mockValidatorConfig implements ValidatorConfig for testing
+type mockValidatorConfig struct {
+	allowedMimes []string
+	maxSize      int64
+}
+
+func (m *mockValidatorConfig) GetAllowedMimes() []string {
+	return m.allowedMimes
+}
+
+func (m *mockValidatorConfig) GetMaxSize() int64 {
+	return m.maxSize
+}
+
 // helper to create a small valid PNG
 func makePNGBytes(t *testing.T) []byte {
 	t.Helper()
@@ -36,9 +50,9 @@ func (b *byteBuffer) Write(p []byte) (int, error) {
 }
 
 func TestValidateType(t *testing.T) {
-	cfg := ValidationConfig{
-		AllowedMimes: []string{"image/png", "image/jpeg"},
-		MaxSize:      10_000_000,
+	cfg := &mockValidatorConfig{
+		allowedMimes: []string{"image/png", "image/jpeg"},
+		maxSize:      10_000_000,
 	}
 	v := NewImageValidator(cfg)
 
@@ -65,9 +79,9 @@ func TestValidateType(t *testing.T) {
 }
 
 func TestValidateSize(t *testing.T) {
-	cfg := ValidationConfig{
-		AllowedMimes: []string{"image/png"},
-		MaxSize:      5,
+	cfg := &mockValidatorConfig{
+		allowedMimes: []string{"image/png"},
+		maxSize:      5,
 	}
 	v := NewImageValidator(cfg)
 
@@ -80,9 +94,9 @@ func TestValidateSize(t *testing.T) {
 }
 
 func TestValidateContent(t *testing.T) {
-	cfg := ValidationConfig{
-		AllowedMimes: []string{"image/png"},
-		MaxSize:      10_000_000,
+	cfg := &mockValidatorConfig{
+		allowedMimes: []string{"image/png"},
+		maxSize:      10_000_000,
 	}
 	v := NewImageValidator(cfg)
 	good := makePNGBytes(t)

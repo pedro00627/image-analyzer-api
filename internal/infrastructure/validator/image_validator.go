@@ -10,11 +10,7 @@ import (
 	domainerr "github.com/pedro00627/image-analyzer-api/internal/domain/error"
 )
 
-// ValidationConfig holds the configuration for image validation
-type ValidationConfig struct {
-	AllowedMimes []string // e.g., ["image/png", "image/jpeg"]
-	MaxSize      int64    // maximum file size in bytes
-}
+//go:generate mockgen -source=./image_validator.go -destination=./mocks/mock_image_validator.go -package=mocks
 
 // ImageValidator validates images based on configuration
 type ImageValidator struct {
@@ -22,17 +18,18 @@ type ImageValidator struct {
 	maxSize      int64
 }
 
-// NewImageValidator constructs an ImageValidator from a ValidationConfig
-func NewImageValidator(cfg ValidationConfig) *ImageValidator {
+// NewImageValidator constructs an ImageValidator from a ValidatorConfig
+func NewImageValidator(cfg ValidatorConfig) *ImageValidator {
 	// Build map of allowed mime types for quick lookup
-	allowedTypes := make(map[string]struct{}, len(cfg.AllowedMimes))
-	for _, mime := range cfg.AllowedMimes {
+	allowedMimes := cfg.GetAllowedMimes()
+	allowedTypes := make(map[string]struct{}, len(allowedMimes))
+	for _, mime := range allowedMimes {
 		allowedTypes[strings.TrimSpace(mime)] = struct{}{}
 	}
 
 	return &ImageValidator{
 		allowedTypes: allowedTypes,
-		maxSize:      cfg.MaxSize,
+		maxSize:      cfg.GetMaxSize(),
 	}
 }
 
