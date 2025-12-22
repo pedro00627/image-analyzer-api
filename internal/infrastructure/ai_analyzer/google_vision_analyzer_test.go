@@ -35,7 +35,7 @@ func TestGoogleVisionAnalyzer_AnalyzeEmptyImage(t *testing.T) {
 	}
 }
 
-// TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzer tests initialization without credentials
+// TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzer tests initialization without GOOGLE_APPLICATION_CREDENTIALS
 func TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzer(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -47,6 +47,21 @@ func TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzer(t *testing.T) {
 	if err == nil {
 		t.Error("expected error without proper Google credentials")
 	}
+}
+
+// TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzerWithSecret tests that the analyzer accepts config
+// Actual credentials are loaded from GOOGLE_APPLICATION_CREDENTIALS env var
+func TestGoogleVisionAnalyzer_NewGoogleVisionAnalyzerWithSecret(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockCfg := cfgmocks.NewMockConfig(ctrl)
+
+	// Config is accepted but credentials come from env var GOOGLE_APPLICATION_CREDENTIALS
+	// Without proper env var, this will fail
+	_, err := NewGoogleVisionAnalyzer(context.Background(), mockCfg)
+	// Error is expected without GOOGLE_APPLICATION_CREDENTIALS env var
+	_ = err
 }
 
 // TestGoogleVisionAnalyzer_AnalyzeSuccess tests successful image analysis

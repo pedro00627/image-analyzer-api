@@ -40,20 +40,22 @@ type AnalyzeImageRequest struct {
 
 // Execute orchestrates the image validation and analysis workflow
 // Returns an AnalysisResult or error if validation fails
+// Validation order: size → content → type (trust content over headers)
 func (u *AnalyzeImageUseCase) Execute(ctx context.Context, req AnalyzeImageRequest) (*entity.AnalysisResult, error) {
-	// Validate image type
-	if err := u.validator.ValidateType(req.Filename, req.MimeType); err != nil {
-		return nil, fmt.Errorf("type validation failed: %w", err)
-	}
-
-	// Validate image size
+	// Validate image size first (quick check)
 	if err := u.validator.ValidateSize(int64(len(req.ImageData))); err != nil {
 		return nil, fmt.Errorf("size validation failed: %w", err)
 	}
 
-	// Validate image content
+	// Validate image content (trust content over headers)
 	if err := u.validator.ValidateContent(req.ImageData); err != nil {
 		return nil, fmt.Errorf("content validation failed: %w", err)
+	}
+
+	// Validate Content-Type header (informational, log if mismatch but don't reject)
+	if err := u.validator.ValidateType(req.Filename, req.MimeType); err != nil {
+		// Log warning but don't reject - content already validated
+		_ = err // TODO: Add logging here
 	}
 
 	// Analyze image

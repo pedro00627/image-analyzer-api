@@ -83,6 +83,8 @@ func TestAnalyzeImageUseCase_ExecuteSuccess(t *testing.T) {
 }
 
 // TestAnalyzeImageUseCase_ValidateTypeFails tests when type validation fails
+// Note: With new strategy, ValidateType is informational only
+// It only fails if content validation fails (bad MIME on bad image)
 func TestAnalyzeImageUseCase_ValidateTypeFails(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -94,9 +96,17 @@ func TestAnalyzeImageUseCase_ValidateTypeFails(t *testing.T) {
 	filename := "test.pdf"
 	mimeType := "application/pdf"
 
+	// Size check (should pass)
 	mockValidator.EXPECT().
-		ValidateType(filename, mimeType).
-		Return(errors.New("unsupported mime type"))
+		ValidateSize(int64(len(imageData))).
+		Return(nil)
+
+	// Content validation fails (not a valid image)
+	mockValidator.EXPECT().
+		ValidateContent(imageData).
+		Return(errors.New("invalid image content"))
+
+	// ValidateType won't be called because content check fails first
 
 	usecase := NewAnalyzeImageUseCase(mockValidator, mockAnalyzer)
 	req := AnalyzeImageRequest{
@@ -108,7 +118,7 @@ func TestAnalyzeImageUseCase_ValidateTypeFails(t *testing.T) {
 	result, err := usecase.Execute(context.Background(), req)
 
 	if err == nil {
-		t.Error("expected error from type validation")
+		t.Error("expected error from content validation")
 	}
 
 	if result != nil {
@@ -128,13 +138,12 @@ func TestAnalyzeImageUseCase_ValidateSizeFails(t *testing.T) {
 	filename := "large.jpg"
 	mimeType := "image/jpeg"
 
-	mockValidator.EXPECT().
-		ValidateType(filename, mimeType).
-		Return(nil)
-
+	// Size check fails first
 	mockValidator.EXPECT().
 		ValidateSize(int64(len(largeImage))).
 		Return(errors.New("file too large"))
+
+	// Other checks won't be called because size fails first
 
 	usecase := NewAnalyzeImageUseCase(mockValidator, mockAnalyzer)
 	req := AnalyzeImageRequest{
@@ -167,16 +176,14 @@ func TestAnalyzeImageUseCase_ValidateContentFails(t *testing.T) {
 	mimeType := "image/jpeg"
 
 	mockValidator.EXPECT().
-		ValidateType(filename, mimeType).
-		Return(nil)
-
-	mockValidator.EXPECT().
 		ValidateSize(int64(len(imageData))).
 		Return(nil)
 
 	mockValidator.EXPECT().
 		ValidateContent(imageData).
 		Return(errors.New("invalid image format"))
+
+	// ValidateType won't be called because content check fails first
 
 	usecase := NewAnalyzeImageUseCase(mockValidator, mockAnalyzer)
 	req := AnalyzeImageRequest{
@@ -209,15 +216,15 @@ func TestAnalyzeImageUseCase_AnalyzerFails(t *testing.T) {
 	mimeType := "image/jpeg"
 
 	mockValidator.EXPECT().
-		ValidateType(filename, mimeType).
-		Return(nil)
-
-	mockValidator.EXPECT().
 		ValidateSize(int64(len(imageData))).
 		Return(nil)
 
 	mockValidator.EXPECT().
 		ValidateContent(imageData).
+		Return(nil)
+
+	mockValidator.EXPECT().
+		ValidateType(filename, mimeType).
 		Return(nil)
 
 	mockAnalyzer.EXPECT().
@@ -306,10 +313,6 @@ func TestAnalyzeImageUseCase_EmptyImageData(t *testing.T) {
 	mimeType := "image/jpeg"
 
 	mockValidator.EXPECT().
-		ValidateType(filename, mimeType).
-		Return(nil)
-
-	mockValidator.EXPECT().
 		ValidateSize(int64(len(imageData))).
 		Return(errors.New("image is empty"))
 
@@ -332,6 +335,7 @@ func TestAnalyzeImageUseCase_EmptyImageData(t *testing.T) {
 }
 
 // TestAnalyzeImageUseCase_MultipleValidationSteps tests the order of validations
+// Order: size → content → type (size first for quick rejection, type last as informational)
 func TestAnalyzeImageUseCase_MultipleValidationSteps(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -344,9 +348,9 @@ func TestAnalyzeImageUseCase_MultipleValidationSteps(t *testing.T) {
 	mimeType := "image/png"
 
 	gomock.InOrder(
-		mockValidator.EXPECT().ValidateType(filename, mimeType).Return(nil),
 		mockValidator.EXPECT().ValidateSize(int64(len(imageData))).Return(nil),
 		mockValidator.EXPECT().ValidateContent(imageData).Return(nil),
+		mockValidator.EXPECT().ValidateType(filename, mimeType).Return(nil),
 		mockAnalyzer.EXPECT().Analyze(gomock.Any(), imageData).Return(
 			&entity.AnalysisResult{Tags: []entity.Tag{{Label: "test", Confidence: 0.9}}},
 			nil,

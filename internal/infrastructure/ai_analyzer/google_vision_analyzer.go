@@ -25,6 +25,7 @@ type GoogleVisionAnalyzer struct {
 var _ Analyzer = (*GoogleVisionAnalyzer)(nil)
 
 // NewGoogleVisionAnalyzer creates a new GoogleVisionAnalyzer
+// Credentials are loaded from GOOGLE_APPLICATION_CREDENTIALS environment variable
 func NewGoogleVisionAnalyzer(ctx context.Context, cfg config.Config) (*GoogleVisionAnalyzer, error) {
 	client, err := vision.NewImageAnnotatorClient(ctx)
 	if err != nil {
