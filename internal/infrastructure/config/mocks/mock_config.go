@@ -47,6 +47,20 @@ func (mr *MockConfigMockRecorder) GetAllowedMimes() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllowedMimes", reflect.TypeOf((*MockConfig)(nil).GetAllowedMimes))
 }
 
+// GetAllowedOrigins mocks base method.
+func (m *MockConfig) GetAllowedOrigins() []string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllowedOrigins")
+	ret0, _ := ret[0].([]string)
+	return ret0
+}
+
+// GetAllowedOrigins indicates an expected call of GetAllowedOrigins.
+func (mr *MockConfigMockRecorder) GetAllowedOrigins() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllowedOrigins", reflect.TypeOf((*MockConfig)(nil).GetAllowedOrigins))
+}
+
 // GetMaxSize mocks base method.
 func (m *MockConfig) GetMaxSize() int64 {
 	m.ctrl.T.Helper()
@@ -73,6 +87,34 @@ func (m *MockConfig) GetProvider() string {
 func (mr *MockConfigMockRecorder) GetProvider() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProvider", reflect.TypeOf((*MockConfig)(nil).GetProvider))
+}
+
+// GetRateLimitBurst mocks base method.
+func (m *MockConfig) GetRateLimitBurst() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRateLimitBurst")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GetRateLimitBurst indicates an expected call of GetRateLimitBurst.
+func (mr *MockConfigMockRecorder) GetRateLimitBurst() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRateLimitBurst", reflect.TypeOf((*MockConfig)(nil).GetRateLimitBurst))
+}
+
+// GetRateLimitPerMinute mocks base method.
+func (m *MockConfig) GetRateLimitPerMinute() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRateLimitPerMinute")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GetRateLimitPerMinute indicates an expected call of GetRateLimitPerMinute.
+func (mr *MockConfigMockRecorder) GetRateLimitPerMinute() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRateLimitPerMinute", reflect.TypeOf((*MockConfig)(nil).GetRateLimitPerMinute))
 }
 
 // GetSecret mocks base method.
