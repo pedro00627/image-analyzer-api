@@ -6,21 +6,31 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/pedro00627/image-analyzer-api/internal/api/handler"
+	"github.com/pedro00627/image-analyzer-api/internal/api/middleware"
 	"github.com/pedro00627/image-analyzer-api/internal/application/service"
 	"github.com/pedro00627/image-analyzer-api/internal/infrastructure/bootstrap"
+	"golang.org/x/time/rate"
 )
 
 // SetupRoutes configures all API routes
 func SetupRoutes(engine *gin.Engine, container bootstrap.DependencyContainer) {
-	// Configure CORS
+	config := container.GetConfig()
+
+	// Configure CORS from environment
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://pedro00627.com", "https://www.pedro00627.com", "http://localhost:3000", "http://localhost:4200"},
+		AllowOrigins:     config.GetAllowedOrigins(),
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	// Configure Rate Limiting from config
+	perMinute := config.GetRateLimitPerMinute()
+	burst := config.GetRateLimitBurst()
+	rateLimiter := middleware.NewRateLimiter(rate.Every(time.Minute/time.Duration(perMinute)), burst)
+	engine.Use(rateLimiter.Limit())
 
 	// Get use case from container
 	useCase := container.GetAnalyzeImageUseCase()

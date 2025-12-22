@@ -18,6 +18,13 @@ type Config interface {
 	// Validator
 	GetAllowedMimes() []string
 	GetMaxSize() int64
+
+	// Rate Limiting
+	GetRateLimitPerMinute() int
+	GetRateLimitBurst() int
+
+	// Server
+	GetAllowedOrigins() []string
 }
 
 // ConfigImpl is the concrete implementation of Config
@@ -40,6 +47,10 @@ type ConfigImpl struct {
 	HTTPReadTimeout  time.Duration
 	HTTPWriteTimeout time.Duration
 	HTTPIdleTimeout  time.Duration
+
+	// Rate Limiting
+	RateLimitPerMinute int
+	RateLimitBurst     int
 }
 
 // LoadConfig loads configuration from environment variables
@@ -67,6 +78,10 @@ func LoadConfigWithReader(reader Reader) (Config, error) {
 		return nil, err
 	}
 
+	if err := loadRateLimitConfig(cfg, reader); err != nil {
+		return nil, err
+	}
+
 	return cfg, nil
 }
 
@@ -88,6 +103,21 @@ func (c *ConfigImpl) GetAllowedMimes() []string {
 // GetMaxSize implements Config
 func (c *ConfigImpl) GetMaxSize() int64 {
 	return c.MaxFileSize
+}
+
+// GetRateLimitPerMinute implements Config
+func (c *ConfigImpl) GetRateLimitPerMinute() int {
+	return c.RateLimitPerMinute
+}
+
+// GetRateLimitBurst implements Config
+func (c *ConfigImpl) GetRateLimitBurst() int {
+	return c.RateLimitBurst
+}
+
+// GetAllowedOrigins implements Config
+func (c *ConfigImpl) GetAllowedOrigins() []string {
+	return c.AllowedOrigins
 }
 
 // loadAIProviderConfig loads AI provider configuration
@@ -176,4 +206,27 @@ func parseCommaSeparated(value string) []string {
 		parts[i] = strings.TrimSpace(parts[i])
 	}
 	return parts
+}
+
+// loadRateLimitConfig loads rate limiting configuration
+func loadRateLimitConfig(cfg *ConfigImpl, reader Reader) error {
+	perMinute, err := strconv.Atoi(reader.Get("RATE_LIMIT_PER_MINUTE", "4"))
+	if err != nil {
+		return fmt.Errorf("invalid RATE_LIMIT_PER_MINUTE: %w", err)
+	}
+	if perMinute <= 0 {
+		return fmt.Errorf("RATE_LIMIT_PER_MINUTE must be positive")
+	}
+	cfg.RateLimitPerMinute = perMinute
+
+	burst, err := strconv.Atoi(reader.Get("RATE_LIMIT_BURST", "4"))
+	if err != nil {
+		return fmt.Errorf("invalid RATE_LIMIT_BURST: %w", err)
+	}
+	if burst <= 0 {
+		return fmt.Errorf("RATE_LIMIT_BURST must be positive")
+	}
+	cfg.RateLimitBurst = burst
+
+	return nil
 }

@@ -45,6 +45,18 @@ func (tc *testConfig) GetMaxSize() int64 {
 	return 10485760
 }
 
+func (tc *testConfig) GetRateLimitPerMinute() int {
+	return 4
+}
+
+func (tc *testConfig) GetRateLimitBurst() int {
+	return 4
+}
+
+func (tc *testConfig) GetAllowedOrigins() []string {
+	return []string{"http://localhost:4200"}
+}
+
 // TestNewServer tests the New function creates a valid server
 func TestNewServer(t *testing.T) {
 	gin.SetMode(gin.TestMode)

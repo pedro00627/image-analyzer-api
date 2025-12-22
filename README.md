@@ -59,13 +59,15 @@ Create a `.env` file in the project root:
 ```env
 AI_PROVIDER=google_vision
 PORT=8080
-ALLOWED_ORIGINS=http://localhost:4200,http://localhost:3000
+ALLOWED_ORIGINS=https://pedro00627.com,https://www.pedro00627.com,https://image-analyzer-ia-web.onrender.com
 MAX_FILE_SIZE=10485760
 ALLOWED_FILE_TYPES=image/jpeg,image/png,image/gif,image/webp
 AI_SERVICE_TIMEOUT=30s
 HTTP_READ_TIMEOUT=10s
 HTTP_WRITE_TIMEOUT=10s
 HTTP_IDLE_TIMEOUT=60s
+RATE_LIMIT_PER_MINUTE=4
+RATE_LIMIT_BURST=4
 ```
 
 ### 3. Run the Application
