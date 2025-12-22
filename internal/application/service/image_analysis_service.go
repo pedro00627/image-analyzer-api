@@ -7,6 +7,8 @@ import (
 	"github.com/pedro00627/image-analyzer-api/internal/domain/entity"
 )
 
+//go:generate mockgen -source=./image_analysis_service.go -destination=mocks/mock_image_analysis_service.go -package=mocks
+
 // ImageAnalysisService defines the contract for image analysis operations
 type ImageAnalysisService interface {
 	AnalyzeImage(ctx context.Context, request *AnalyzeImageRequest) (*entity.AnalysisResult, error)

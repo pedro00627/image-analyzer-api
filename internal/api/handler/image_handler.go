@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pedro00627/image-analyzer-api/internal/application/service"
+	domainError "github.com/pedro00627/image-analyzer-api/internal/domain/error"
 )
 
 // ImageHandler handles image analysis requests
@@ -21,40 +23,70 @@ func NewImageHandler(svc service.ImageAnalysisService) *ImageHandler {
 
 // AnalyzeImage handles POST /api/analyze requests
 func (h *ImageHandler) AnalyzeImage(c *gin.Context) {
-	var req service.AnalyzeImageRequest
-
-	// Parse multipart form
-	file, err := c.FormFile("image")
+	// Parse request
+	req, err := h.parseRequest(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing image file"})
+		h.handleError(c, err)
 		return
 	}
 
-	// Read file content
+	// Call service
+	result, err := h.service.AnalyzeImage(c.Request.Context(), req)
+	if err != nil {
+		h.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    result,
+	})
+}
+
+// parseRequest extracts and validates the image from the request
+func (h *ImageHandler) parseRequest(c *gin.Context) (*service.AnalyzeImageRequest, error) {
+	file, err := c.FormFile("image")
+	if err != nil {
+		return nil, err
+	}
+
 	src, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
-		return
+		return nil, err
 	}
 	defer src.Close()
 
-	// Read file data
-	buf := make([]byte, file.Size)
-	if _, err := src.Read(buf); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file data"})
-		return
-	}
-
-	req.Filename = file.Filename
-	req.MimeType = file.Header.Get("Content-Type")
-	req.ImageData = buf
-
-	// Call service
-	result, err := h.service.AnalyzeImage(c.Request.Context(), &req)
+	data, err := io.ReadAll(src)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return nil, err
+	}
+
+	return &service.AnalyzeImageRequest{
+		Filename:  file.Filename,
+		MimeType:  file.Header.Get("Content-Type"),
+		ImageData: data,
+	}, nil
+}
+
+// handleError maps domain errors to HTTP responses
+func (h *ImageHandler) handleError(c *gin.Context, err error) {
+	if domainErr, ok := err.(*domainError.DomainError); ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error": gin.H{
+				"code":    domainErr.Code,
+				"message": domainErr.Message,
+			},
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	// Unknown error
+	c.JSON(http.StatusInternalServerError, gin.H{
+		"success": false,
+		"error": gin.H{
+			"code":    "internal_error",
+			"message": err.Error(),
+		},
+	})
 }
