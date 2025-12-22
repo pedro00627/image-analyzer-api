@@ -34,3 +34,4 @@ go.work.sum
 *.md
 *.pdf
 coverage
+credentials.json
