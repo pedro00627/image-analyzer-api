@@ -12,7 +12,7 @@ services:
       - key: AI_PROVIDER
         value: google_vision
       - key: ALLOWED_ORIGINS
-        value: https://pero00627.com,https://www.pero00627.com
+        value: https://pedro00627.com,https://www.pedro00627.com
       - key: MAX_FILE_SIZE
         value: 10485760
       - key: ALLOWED_FILE_TYPES

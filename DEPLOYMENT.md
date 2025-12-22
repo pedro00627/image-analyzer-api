@@ -7,7 +7,7 @@ This guide walks you through deploying the Image Analyzer application on Render.
 - GitHub account with both repositories
 - Render.com account (free, no credit card required initially)
 - Google Cloud credentials JSON file
-- Domain pero00627.com configured in Hostinger
+- Domain pedro00627.com configured in Hostinger
 
 ## Step 1: Prepare Google Cloud Credentials
 
@@ -116,28 +116,28 @@ NODE_VERSION=18
 
 ## Step 4: Configure Custom Domains
 
-### 4.1 Configure Backend Domain (api.pero00627.com)
+### 4.1 Configure Backend Domain (api.pedro00627.com)
 
 1. Go to your `image-analyzer-api` web service in Render
 2. Click **"Settings"** → **"Custom Domains"**
 3. Click **"Add Custom Domain"**
-4. Enter: `api.pero00627.com`
+4. Enter: `api.pedro00627.com`
 5. Render will show DNS records to configure
 
-### 4.2 Configure Frontend Domain (pero00627.com)
+### 4.2 Configure Frontend Domain (pedro00627.com)
 
 1. Go to your `image-analyzer-web` static site
 2. Click **"Settings"** → **"Custom Domains"**
 3. Click **"Add Custom Domain"**
 4. Add both:
-   - `pero00627.com`
-   - `www.pero00627.com`
+   - `pedro00627.com`
+   - `www.pedro00627.com`
 5. Render will show DNS records for each
 
 ### 4.3 Configure DNS in Hostinger
 
 1. Log into Hostinger
-2. Go to **Domains** → Select `pero00627.com`
+2. Go to **Domains** → Select `pedro00627.com`
 3. Go to **DNS / Name Servers**
 4. Add these records:
 
@@ -171,9 +171,9 @@ TTL: 3600
 ### 4.4 Verify Domains
 
 After DNS propagation, test all URLs:
-- ✅ Frontend: `https://pero00627.com`
-- ✅ Frontend: `https://www.pero00627.com`
-- ✅ Backend: `https://api.pero00627.com/health`
+- ✅ Frontend: `https://pedro00627.com`
+- ✅ Frontend: `https://www.pedro00627.com`
+- ✅ Backend: `https://api.pedro00627.com/health`
 
 ## Step 5: Update Backend CORS
 
@@ -183,7 +183,7 @@ Once your domains are configured, update backend CORS to allow your custom domai
 2. Go to **"Environment"** tab
 3. Update `ALLOWED_ORIGINS` environment variable to:
 ```
-ALLOWED_ORIGINS=https://pero00627.com,https://www.pero00627.com
+ALLOWED_ORIGINS=https://pedro00627.com,https://www.pedro00627.com
 ```
 4. Click **"Save Changes"**
 5. Service will automatically redeploy (takes ~2-3 minutes)
