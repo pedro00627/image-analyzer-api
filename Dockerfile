@@ -38,10 +38,11 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app /app
 
-# Copy credentials file if it exists
+# Copy credentials file if it exists (for local development)
+# The asterisk makes it optional - won't fail if file doesn't exist
 COPY credentials.json* /app/credentials.json
 
-# Set environment variable for Google Cloud credentials
+# Set default credentials path (can be overridden by environment variable)
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
 
 # Change ownership to non-root user
