@@ -69,11 +69,13 @@ func TestValidateType(t *testing.T) {
 		filename    string
 		contentType string
 		wantErr     bool
+		desc        string
 	}{
-		{"png by mime", "file.bin", "image/png", false},
-		{"jpeg by mime", "file.bin", "image/jpeg", false},
-		{"missing mime", "photo.png", "", true},
-		{"unsupported mime", "file.bin", "application/octet-stream", true},
+		{"png by mime", "file.bin", "image/png", false, "Allowed MIME type"},
+		{"jpeg by mime", "file.bin", "image/jpeg", false, "Allowed MIME type"},
+		{"missing mime", "photo.png", "", false, "No MIME type is ok - content already validated"},
+		{"unsupported mime", "file.bin", "application/octet-stream", false, "Unrecognized MIME is ok - content validation is primary check"},
+		{"webp mime", "file.bin", "image/webp", false, "WebP without explicit type=image/webp is now ok"},
 	}
 
 	for _, tt := range tests {
