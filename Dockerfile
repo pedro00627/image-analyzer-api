@@ -38,6 +38,12 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder /app /app
 
+# Copy credentials file if it exists
+COPY credentials.json* /app/credentials.json
+
+# Set environment variable for Google Cloud credentials
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app
 

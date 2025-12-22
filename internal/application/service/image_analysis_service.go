@@ -5,12 +5,13 @@ import (
 
 	"github.com/pedro00627/image-analyzer-api/internal/application/usecase"
 	"github.com/pedro00627/image-analyzer-api/internal/domain/entity"
-	"github.com/pedro00627/image-analyzer-api/internal/domain/error"
 )
+
+//go:generate mockgen -source=./image_analysis_service.go -destination=mocks/mock_image_analysis_service.go -package=mocks
 
 // ImageAnalysisService defines the contract for image analysis operations
 type ImageAnalysisService interface {
-	AnalyzeImage(ctx context.Context, request *AnalyzeImageRequest) (*entity.AnalysisResult, *error.DomainError)
+	AnalyzeImage(ctx context.Context, request *AnalyzeImageRequest) (*entity.AnalysisResult, error)
 }
 
 // AnalyzeImageRequest represents a request to analyze an image
@@ -33,7 +34,7 @@ func NewImageAnalysisService(uc usecase.AnalyzeImageUseCaseInterface) ImageAnaly
 }
 
 // AnalyzeImage analyzes an image and returns the analysis result
-func (s *imageAnalysisServiceImpl) AnalyzeImage(ctx context.Context, request *AnalyzeImageRequest) (*entity.AnalysisResult, *error.DomainError) {
+func (s *imageAnalysisServiceImpl) AnalyzeImage(ctx context.Context, request *AnalyzeImageRequest) (*entity.AnalysisResult, error) {
 	// Delegate to usecase
 	useCaseReq := usecase.AnalyzeImageRequest{
 		Filename:  request.Filename,

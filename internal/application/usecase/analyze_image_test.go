@@ -74,7 +74,7 @@ func TestAnalyzeImageUseCase_ExecuteSuccess(t *testing.T) {
 	}
 
 	if result == nil {
-		t.Error("expected non-nil result")
+		t.Fatal("expected non-nil result")
 	}
 
 	if len(result.Tags) != 2 {
@@ -372,5 +372,63 @@ func TestAnalyzeImageUseCase_MultipleValidationSteps(t *testing.T) {
 
 	if result == nil {
 		t.Error("expected non-nil result")
+	}
+}
+
+// TestAnalyzeImageUseCase_ValidateTypeFailsButContinues tests that type validation
+// failure doesn't stop the flow (it's informational only)
+func TestAnalyzeImageUseCase_ValidateTypeFailsButContinues(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockValidator := mocks.NewMockImageValidator(ctrl)
+	mockAnalyzer := mocks.NewMockAIAnalyzer(ctrl)
+
+	imageData := []byte{0xFF, 0xD8, 0xFF} // Valid JPEG
+	filename := "test.txt"                 // Wrong extension
+	mimeType := "text/plain"               // Wrong MIME type
+
+	// Size and content pass (valid JPEG)
+	mockValidator.EXPECT().
+		ValidateSize(int64(len(imageData))).
+		Return(nil)
+
+	mockValidator.EXPECT().
+		ValidateContent(imageData).
+		Return(nil)
+
+	// Type validation fails but should not stop execution
+	mockValidator.EXPECT().
+		ValidateType(filename, mimeType).
+		Return(errors.New("invalid file type"))
+
+	// Analyzer should still be called
+	expectedResult := entity.NewAnalysisResult([]entity.Tag{
+		{Label: "test", Confidence: 0.85},
+	})
+
+	mockAnalyzer.EXPECT().
+		Analyze(gomock.Any(), imageData).
+		Return(&expectedResult, nil)
+
+	usecase := NewAnalyzeImageUseCase(mockValidator, mockAnalyzer)
+	req := AnalyzeImageRequest{
+		Filename:  filename,
+		ImageData: imageData,
+		MimeType:  mimeType,
+	}
+
+	result, err := usecase.Execute(context.Background(), req)
+
+	if err != nil {
+		t.Errorf("expected no error (type validation is informational), got %v", err)
+	}
+
+	if result == nil {
+		t.Fatal("expected non-nil result")
+	}
+
+	if len(result.Tags) != 1 {
+		t.Errorf("expected 1 tag, got %d", len(result.Tags))
 	}
 }

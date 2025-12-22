@@ -48,7 +48,7 @@ func NewGoogleVisionAnalyzerWithClient(client VisionClient, cfg config.Config) *
 
 // Analyze analyzes an image using Google Cloud Vision API and returns detected labels
 func (g *GoogleVisionAnalyzer) Analyze(ctx context.Context, imageData []byte) (*entity.AnalysisResult, error) {
-	if imageData == nil || len(imageData) == 0 {
+	if len(imageData) == 0 {
 		return nil, fmt.Errorf("image data is empty")
 	}
 
