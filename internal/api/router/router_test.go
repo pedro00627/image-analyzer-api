@@ -33,6 +33,9 @@ func TestSetupRoutes(t *testing.T) {
 	mockCfg := mocks.NewMockConfig(ctrl)
 	mockCfg.EXPECT().GetAllowedMimes().Return([]string{"image/jpeg"}).AnyTimes()
 	mockCfg.EXPECT().GetMaxSize().Return(int64(10485760)).AnyTimes()
+	mockCfg.EXPECT().GetAllowedOrigins().Return([]string{"http://localhost:4200"}).AnyTimes()
+	mockCfg.EXPECT().GetRateLimitPerMinute().Return(4).AnyTimes()
+	mockCfg.EXPECT().GetRateLimitBurst().Return(4).AnyTimes()
 
 	analyzer := ai_analyzer.NewMockAnalyzer()
 	imgValidator := validator.NewImageValidator(mockCfg)

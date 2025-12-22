@@ -10,8 +10,9 @@ import (
 
 // mockValidatorConfig implements config.Config for testing
 type mockValidatorConfig struct {
-	allowedMimes []string
-	maxSize      int64
+	allowedMimes   []string
+	maxSize        int64
+	allowedOrigins []string
 }
 
 func (m *mockValidatorConfig) GetProvider() string {
@@ -28,6 +29,18 @@ func (m *mockValidatorConfig) GetAllowedMimes() []string {
 
 func (m *mockValidatorConfig) GetMaxSize() int64 {
 	return m.maxSize
+}
+
+func (m *mockValidatorConfig) GetRateLimitPerMinute() int {
+	return 4
+}
+
+func (m *mockValidatorConfig) GetRateLimitBurst() int {
+	return 4
+}
+
+func (m *mockValidatorConfig) GetAllowedOrigins() []string {
+	return m.allowedOrigins
 }
 
 // helper to create a small valid PNG
