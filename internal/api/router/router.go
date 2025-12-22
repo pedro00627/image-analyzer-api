@@ -14,7 +14,7 @@ import (
 func SetupRoutes(engine *gin.Engine, container bootstrap.DependencyContainer) {
 	// Configure CORS
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://pedro00627.com", "https://www.pedro00627.com", "http://localhost:3000"},
+		AllowOrigins:     []string{"https://pedro00627.com", "https://www.pedro00627.com", "http://localhost:3000", "http://localhost:4200"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
