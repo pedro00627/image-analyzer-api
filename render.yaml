@@ -1,0 +1,30 @@
+services:
+  # Backend API Service
+  - type: web
+    name: image-analyzer-api
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: AI_PROVIDER
+        value: google_vision
+      - key: ALLOWED_ORIGINS
+        value: https://pedro00627.com,https://www.pedro00627.com
+      - key: MAX_FILE_SIZE
+        value: 10485760
+      - key: ALLOWED_FILE_TYPES
+        value: image/jpeg,image/png,image/gif,image/webp
+      - key: AI_SERVICE_TIMEOUT
+        value: 30s
+      - key: HTTP_READ_TIMEOUT
+        value: 10s
+      - key: HTTP_WRITE_TIMEOUT
+        value: 10s
+      - key: HTTP_IDLE_TIMEOUT
+        value: 60s
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        sync: false
+    healthCheckPath: /health
