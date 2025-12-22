@@ -24,7 +24,7 @@ func TestNewImageHandler(t *testing.T) {
 	handler := NewImageHandler(mockService)
 
 	if handler == nil {
-		t.Error("NewImageHandler() returned nil")
+		t.Fatal("NewImageHandler() returned nil")
 	}
 
 	if handler.service != mockService {
@@ -53,9 +53,17 @@ func TestImageHandler_AnalyzeImage_Success(t *testing.T) {
 	// Create multipart form
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("image", "test.jpg")
-	part.Write([]byte("fake image data"))
-	writer.Close()
+	part, err := writer.CreateFormFile("image", "test.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
+	_, err = part.Write([]byte("fake image data"))
+	if err != nil {
+		t.Fatalf("Failed to write to form file: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Failed to close writer: %v", err)
+	}
 
 	// Create request
 	w := httptest.NewRecorder()
@@ -73,7 +81,9 @@ func TestImageHandler_AnalyzeImage_Success(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if success, ok := response["success"].(bool); !ok || !success {
 		t.Error("Expected success: true")
@@ -103,7 +113,9 @@ func TestImageHandler_AnalyzeImage_MissingFile(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if success, ok := response["success"].(bool); !ok || success {
 		t.Error("Expected success: false")
@@ -125,9 +137,17 @@ func TestImageHandler_AnalyzeImage_DomainError(t *testing.T) {
 	// Create multipart form
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("image", "test.jpg")
-	part.Write([]byte("fake image data"))
-	writer.Close()
+	part, err := writer.CreateFormFile("image", "test.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
+	_, err = part.Write([]byte("fake image data"))
+	if err != nil {
+		t.Fatalf("Failed to write to form file: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Failed to close writer: %v", err)
+	}
 
 	// Create request
 	w := httptest.NewRecorder()
@@ -145,15 +165,20 @@ func TestImageHandler_AnalyzeImage_DomainError(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if success, ok := response["success"].(bool); !ok || success {
 		t.Error("Expected success: false")
 	}
 
-	errorObj := response["error"].(map[string]interface{})
-	if code := errorObj["code"].(string); code != domainError.CodeInvalidFileType {
-		t.Errorf("Expected error code %s, got %s", domainError.CodeInvalidFileType, code)
+	if errorObj, ok := response["error"].(map[string]interface{}); ok {
+		if code := errorObj["code"].(string); code != domainError.CodeInvalidFileType {
+			t.Errorf("Expected error code %s, got %s", domainError.CodeInvalidFileType, code)
+		}
+	} else {
+		t.Error("Expected error object in response")
 	}
 }
 
@@ -172,9 +197,17 @@ func TestImageHandler_AnalyzeImage_UnknownError(t *testing.T) {
 	// Create multipart form
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("image", "test.jpg")
-	part.Write([]byte("fake image data"))
-	writer.Close()
+	part, err := writer.CreateFormFile("image", "test.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
+	_, err = part.Write([]byte("fake image data"))
+	if err != nil {
+		t.Fatalf("Failed to write to form file: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Failed to close writer: %v", err)
+	}
 
 	// Create request
 	w := httptest.NewRecorder()
@@ -192,15 +225,24 @@ func TestImageHandler_AnalyzeImage_UnknownError(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
 	if success, ok := response["success"].(bool); !ok || success {
 		t.Error("Expected success: false")
 	}
 
-	errorObj := response["error"].(map[string]interface{})
-	if code := errorObj["code"].(string); code != "internal_error" {
-		t.Errorf("Expected error code internal_error, got %s", code)
+	if errorObj, ok := response["error"].(map[string]interface{}); ok {
+		if code, ok := errorObj["code"].(string); ok {
+			if code != "internal_error" {
+				t.Errorf("Expected error code internal_error, got %s", code)
+			}
+		} else {
+			t.Error("Expected error code string in error object")
+		}
+	} else {
+		t.Error("Expected error object in response")
 	}
 }
 
@@ -215,10 +257,18 @@ func TestImageHandler_parseRequest_Success(t *testing.T) {
 	// Create multipart form
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, _ := writer.CreateFormFile("image", "test.jpg")
+	part, err := writer.CreateFormFile("image", "test.jpg")
+	if err != nil {
+		t.Fatalf("Failed to create form file: %v", err)
+	}
 	testData := []byte("fake image data")
-	part.Write(testData)
-	writer.Close()
+	_, err = part.Write(testData)
+	if err != nil {
+		t.Fatalf("Failed to write to form file: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("Failed to close writer: %v", err)
+	}
 
 	// Create request
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -291,11 +341,20 @@ func TestImageHandler_handleError_DomainError(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
-	errorObj := response["error"].(map[string]interface{})
-	if code := errorObj["code"].(string); code != domainError.CodeFileTooLarge {
-		t.Errorf("Expected error code %s, got %s", domainError.CodeFileTooLarge, code)
+	if errorObj, ok := response["error"].(map[string]interface{}); ok {
+		if code, ok := errorObj["code"].(string); ok {
+			if code != domainError.CodeFileTooLarge {
+				t.Errorf("Expected error code %s, got %s", domainError.CodeFileTooLarge, code)
+			}
+		} else {
+			t.Error("Expected error code string in error object")
+		}
+	} else {
+		t.Error("Expected error object in response")
 	}
 }
 
@@ -317,10 +376,19 @@ func TestImageHandler_handleError_UnknownError(t *testing.T) {
 	}
 
 	var response map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &response)
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
 
-	errorObj := response["error"].(map[string]interface{})
-	if code := errorObj["code"].(string); code != "internal_error" {
-		t.Errorf("Expected error code internal_error, got %s", code)
+	if errorObj, ok := response["error"].(map[string]interface{}); ok {
+		if code, ok := errorObj["code"].(string); ok {
+			if code != "internal_error" {
+				t.Errorf("Expected error code internal_error, got %s", code)
+			}
+		} else {
+			t.Error("Expected error code string in error object")
+		}
+	} else {
+		t.Error("Expected error object in response")
 	}
 }

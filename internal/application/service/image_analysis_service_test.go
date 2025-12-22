@@ -104,7 +104,7 @@ func TestImageAnalysisService_AnalyzeImage_MapsRequestCorrectly(t *testing.T) {
 
 	mockUseCase.EXPECT().
 		Execute(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(ctx context.Context, req usecase.AnalyzeImageRequest) (*entity.AnalysisResult, error) {
+		DoAndReturn(func(_ context.Context, req usecase.AnalyzeImageRequest) (*entity.AnalysisResult, error) {
 			if req.Filename != expectedFilename {
 				t.Errorf("Expected filename %s, got %s", expectedFilename, req.Filename)
 			}
@@ -123,5 +123,8 @@ func TestImageAnalysisService_AnalyzeImage_MapsRequestCorrectly(t *testing.T) {
 		ImageData: expectedData,
 	}
 
-	service.AnalyzeImage(context.Background(), req)
+	_, err := service.AnalyzeImage(context.Background(), req)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
 }

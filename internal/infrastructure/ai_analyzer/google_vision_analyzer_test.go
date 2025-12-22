@@ -105,7 +105,7 @@ func TestGoogleVisionAnalyzer_AnalyzeSuccess(t *testing.T) {
 	}
 
 	if result == nil {
-		t.Error("expected non-nil result")
+		t.Fatal("expected non-nil result")
 	}
 
 	if len(result.Tags) != 2 {
@@ -299,7 +299,7 @@ func TestGoogleVisionAnalyzer_AnalyzeWithMixedTags(t *testing.T) {
 	}
 
 	if result == nil {
-		t.Error("expected non-nil result")
+		t.Fatal("expected non-nil result")
 	}
 
 	// Should only have the valid tag
