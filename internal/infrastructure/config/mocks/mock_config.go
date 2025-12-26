@@ -130,3 +130,31 @@ func (mr *MockConfigMockRecorder) GetSecret() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecret", reflect.TypeOf((*MockConfig)(nil).GetSecret))
 }
+
+// GetWorkerPoolQueueSize mocks base method.
+func (m *MockConfig) GetWorkerPoolQueueSize() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkerPoolQueueSize")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GetWorkerPoolQueueSize indicates an expected call of GetWorkerPoolQueueSize.
+func (mr *MockConfigMockRecorder) GetWorkerPoolQueueSize() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerPoolQueueSize", reflect.TypeOf((*MockConfig)(nil).GetWorkerPoolQueueSize))
+}
+
+// GetWorkerPoolSize mocks base method.
+func (m *MockConfig) GetWorkerPoolSize() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkerPoolSize")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GetWorkerPoolSize indicates an expected call of GetWorkerPoolSize.
+func (mr *MockConfigMockRecorder) GetWorkerPoolSize() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerPoolSize", reflect.TypeOf((*MockConfig)(nil).GetWorkerPoolSize))
+}
