@@ -266,7 +266,7 @@ func TestAnalyzerWorkerPool_QueueLimit(t *testing.T) {
 		go func() {
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 			defer cancel()
-			_, _ = pool.Analyze(ctx, imageData)
+			_, _ = pool.Analyze(ctx, imageData) //nolint:errcheck // intentionally ignoring error in test goroutine
 		}()
 	}
 
@@ -347,7 +347,7 @@ func TestAnalyzerWorkerPool_WorkerConcurrency(t *testing.T) {
 			defer wg.Done()
 			ctx := context.Background()
 			imageData := []byte("test data")
-			_, _ = pool.Analyze(ctx, imageData)
+			_, _ = pool.Analyze(ctx, imageData) //nolint:errcheck // intentionally ignoring error in test goroutine
 		}()
 	}
 
