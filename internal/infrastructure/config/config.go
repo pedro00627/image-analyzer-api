@@ -23,6 +23,10 @@ type Config interface {
 	GetRateLimitPerMinute() int
 	GetRateLimitBurst() int
 
+	// Worker Pool
+	GetWorkerPoolSize() int
+	GetWorkerPoolQueueSize() int
+
 	// Server
 	GetAllowedOrigins() []string
 }
@@ -51,6 +55,10 @@ type ConfigImpl struct {
 	// Rate Limiting
 	RateLimitPerMinute int
 	RateLimitBurst     int
+
+	// Worker Pool
+	WorkerPoolSize      int
+	WorkerPoolQueueSize int
 }
 
 // LoadConfig loads configuration from environment variables
@@ -79,6 +87,10 @@ func LoadConfigWithReader(reader Reader) (Config, error) {
 	}
 
 	if err := loadRateLimitConfig(cfg, reader); err != nil {
+		return nil, err
+	}
+
+	if err := loadWorkerPoolConfig(cfg, reader); err != nil {
 		return nil, err
 	}
 
@@ -118,6 +130,16 @@ func (c *ConfigImpl) GetRateLimitBurst() int {
 // GetAllowedOrigins implements Config
 func (c *ConfigImpl) GetAllowedOrigins() []string {
 	return c.AllowedOrigins
+}
+
+// GetWorkerPoolSize implements Config
+func (c *ConfigImpl) GetWorkerPoolSize() int {
+	return c.WorkerPoolSize
+}
+
+// GetWorkerPoolQueueSize implements Config
+func (c *ConfigImpl) GetWorkerPoolQueueSize() int {
+	return c.WorkerPoolQueueSize
 }
 
 // loadAIProviderConfig loads AI provider configuration

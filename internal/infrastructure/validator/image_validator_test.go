@@ -39,6 +39,14 @@ func (m *mockValidatorConfig) GetRateLimitBurst() int {
 	return 4
 }
 
+func (m *mockValidatorConfig) GetWorkerPoolSize() int {
+	return 5
+}
+
+func (m *mockValidatorConfig) GetWorkerPoolQueueSize() int {
+	return 100
+}
+
 func (m *mockValidatorConfig) GetAllowedOrigins() []string {
 	return m.allowedOrigins
 }
