@@ -53,6 +53,14 @@ func (tc *testConfig) GetRateLimitBurst() int {
 	return 4
 }
 
+func (tc *testConfig) GetWorkerPoolSize() int {
+	return 5
+}
+
+func (tc *testConfig) GetWorkerPoolQueueSize() int {
+	return 100
+}
+
 func (tc *testConfig) GetAllowedOrigins() []string {
 	return []string{"http://localhost:4200"}
 }
