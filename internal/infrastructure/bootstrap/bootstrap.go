@@ -62,10 +62,23 @@ func (c *Container) GetAnalyzeImageUseCase() usecase.AnalyzeImageUseCaseInterfac
 
 // initializeAIAnalyzer initializes the AI analyzer with fallback to mock
 func initializeAIAnalyzer(ctx context.Context, cfg config.Config) service.AIAnalyzer {
-	analyzer, err := ai_analyzer.NewGoogleVisionAnalyzer(ctx, cfg)
+	// Create the base analyzer
+	baseAnalyzer, err := ai_analyzer.NewGoogleVisionAnalyzer(ctx, cfg)
 	if err != nil {
 		// Fallback to mock analyzer if Google Vision fails
 		return ai_analyzer.NewMockAnalyzer()
 	}
-	return analyzer
+
+	// Wrap with worker pool for concurrency control
+	pooledAnalyzer, err := ai_analyzer.NewAnalyzerWorkerPool(
+		baseAnalyzer,
+		cfg.GetWorkerPoolSize(),
+		cfg.GetWorkerPoolQueueSize(),
+	)
+	if err != nil {
+		// Fallback to base analyzer without worker pool
+		return baseAnalyzer
+	}
+
+	return pooledAnalyzer
 }
